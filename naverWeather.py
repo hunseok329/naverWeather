@@ -65,12 +65,15 @@ class naverWeather():
         self.area = area
         self.addr = None
         self.result = None
-        
-        cityNum = naverWeather.map_cityNum[area]
-        if not cityNum:
-            print("도시명 잘못")
-            # 잘못된 도시명을 입력한 경우
+
+        # 잘못된 도시명을 입력한 경우
+        if self.area not in naverWeather.map_cityNum: 
             return
+        cityNum = naverWeather.map_cityNum[area]
+        # if not cityNum:
+        #     print("도시명 잘못")
+        #     # 잘못된 도시명을 입력한 경우
+        #     return
         self.addr = naverWeather.addr + cityNum
         
         self.search()
@@ -80,19 +83,18 @@ class naverWeather():
 
         req = naverWeather.session.get(self.addr)
         soup = BeautifulSoup(req.text, "html.parser")
-        table = soup.find(class_="tbl_weather tbl_today3")
-       
+        table = soup.find(class_="week_list")
+        print(list(table.stripped_strings))
         t_ary = list(table.stripped_strings)
 
-        self.result = (
-                "["+ self.area + " 날씨 검색 결과]\n"
-                + "- 오늘(" + t_ary[3] + ")\n"
-                + "\t오전 - " + t_ary[7] + "℃(" +  t_ary[9] + ", 강수확률 " + t_ary[11] + ")\n"
-                + "\t오후 - " + t_ary[13] + "℃(" +  t_ary[15] + ", 강수확률 " + t_ary[17] + ")\n"
-                + "- 내일(" + t_ary[5] + ")\n"
-                + "\t오전 - " + t_ary[19] + "℃(" +  t_ary[21] + ", 강수확률 " + t_ary[23] + ")\n"
-                + "\t오후 - " + t_ary[25] + "℃(" +  t_ary[27] + ", 강수확률 " + t_ary[29] + ")\n"
-                )
+        self.result = ("[" + self.area + " 날씨 검색 결과]\n"
+                    + "- 오늘(" + t_ary[1] +")\n"
+                    + " \t 오전 - " + t_ary[11] + "C (" + t_ary[5] + ", 강수확률 : " + t_ary[4] + ")\n"
+                    + " \t 오후 - " + t_ary[14] + "C (" + t_ary[9] + ", 강수확률 : " + t_ary[8] + ")\n"
+                    + "- 내일(" + t_ary[16] + ")\n"
+                    + " \t 오전 - " + t_ary[26] + "C (" + t_ary[20] + ", 강수확률 : " + t_ary[19] + ")\n"
+                    + " \t 오후 - " + t_ary[29] + "C (" + t_ary[24] + ", 강수확률 : " + t_ary[23] + ")\n")
+
 
     def getWeather(self):
         if not self.result:
