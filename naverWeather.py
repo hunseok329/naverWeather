@@ -67,14 +67,7 @@ class naverWeather():
         self.addr = None
         self.result = None
 
-        # 잘못된 도시명을 입력한 경우
-        # if self.area not in naverWeather.map_cityNum: 
-        #     return
         cityNum = naverWeather.map_cityNum[area]
-        # if not cityNum:
-        #     print("도시명 잘못")
-        #     # 잘못된 도시명을 입력한 경우
-        #     return
         self.addr = naverWeather.addr + cityNum
         
         self.search()
@@ -83,22 +76,54 @@ class naverWeather():
         naverWeather.session.encoding = 'utf-8'
 
         req = naverWeather.session.get(self.addr)
-        print(self.addr)
         soup = BeautifulSoup(req.text, "html.parser")
         location = soup.find(class_='location_name')
         table = soup.find(class_="week_list")
-        print(location)
-        # print(list(table.stripped_strings))
+        time_temp = soup.find(class_="time_list align_left")
+        times = list(time_temp.stripped_strings)
         t_ary = list(table.stripped_strings)
+        
+        TIME = [times[x] for x in range(0, len(times), 3)]
+        TEMP = [int(times[x][:-1]) for x in range(2, len(times), 3)]
 
-        self.result = ("[" + self.area + " 날씨 검색 결과]\n"
+        MIN_TEMP = min(TEMP)
+        MAX_TEMP = max(TEMP)
+        height = MAX_TEMP - MIN_TEMP + 1
+        graph = [[" ■ " for _ in range(len(TIME)+1)] for _ in range(height+1)]
+        graph[-1][0] = "   "
+
+        for y in range(height):
+            graph[y][0] = str(MAX_TEMP-y) + "℃"
+        
+        for x in range(len(TIME)):
+            if len(TIME[x]) == 2 and TIME[x] not in ['모레', '내일', '글피']:
+                TIME[x] = " " + TIME[x]
+            graph[-1][x+1] = TIME[x]
+
+        for x in range(1, len(TIME)+1):
+            for y in range(MAX_TEMP-TEMP[x-1]):
+                graph[y][x] = "    "
+            graph[MAX_TEMP-TEMP[x-1]][x] = str(TEMP[x-1]) + "º"
+
+        for line in graph:
+            print(" ".join(line))
+
+
+
+                        
+        self.result = ("[" + self.area + "(" + location.text +")"+" 날씨 검색 결과]\n"
                     + "- 오늘(" + t_ary[1] +")\n"
                     + " \t 오전 - " + t_ary[11][:-1] + "℃ (" + t_ary[5] + ", 강수확률 : " + t_ary[4] + ")\n"
                     + " \t 오후 - " + t_ary[14][:-1] + "℃ (" + t_ary[9] + ", 강수확률 : " + t_ary[8] + ")\n"
                     + "- 내일(" + t_ary[16] + ")\n"
                     + " \t 오전 - " + t_ary[26][:-1] + "℃ (" + t_ary[20] + ", 강수확률 : " + t_ary[19] + ")\n"
-                    + " \t 오후 - " + t_ary[29][:-1] + "℃ (" + t_ary[24] + ", 강수확률 : " + t_ary[23] + ")\n")
+                    + " \t 오후 - " + t_ary[29][:-1] + "℃ (" + t_ary[24] + ", 강수확률 : " + t_ary[23] + ")\n\n")
 
+
+
+        
+
+        
 
     def getWeather(self):
         if not self.result:
