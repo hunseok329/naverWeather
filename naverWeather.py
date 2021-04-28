@@ -66,6 +66,7 @@ class naverWeather():
         self.area = area
         self.addr = None
         self.result = None
+        self.graph = None
 
         cityNum = naverWeather.map_cityNum[area]
         self.addr = naverWeather.addr + cityNum
@@ -89,26 +90,21 @@ class naverWeather():
         MIN_TEMP = min(TEMP)
         MAX_TEMP = max(TEMP)
         height = MAX_TEMP - MIN_TEMP + 1
-        graph = [[" ■ " for _ in range(len(TIME)+1)] for _ in range(height+1)]
-        graph[-1][0] = "   "
+        self.graph = [[" ■ " for _ in range(len(TIME)+1)] for _ in range(height+1)]
+        self.graph[-1][0] = "   "
 
         for y in range(height):
-            graph[y][0] = str(MAX_TEMP-y) + "℃"
+            self.graph[y][0] = str(MAX_TEMP-y) + "℃"
         
         for x in range(len(TIME)):
             if len(TIME[x]) == 2 and TIME[x] not in ['모레', '내일', '글피']:
                 TIME[x] = " " + TIME[x]
-            graph[-1][x+1] = TIME[x]
+            self.graph[-1][x+1] = TIME[x]
 
         for x in range(1, len(TIME)+1):
             for y in range(MAX_TEMP-TEMP[x-1]):
-                graph[y][x] = "    "
-            graph[MAX_TEMP-TEMP[x-1]][x] = str(TEMP[x-1]) + "º"
-
-        for line in graph:
-            print(" ".join(line))
-
-
+                self.graph[y][x] = "    "
+            self.graph[MAX_TEMP-TEMP[x-1]][x] = str(TEMP[x-1]) + "º"
 
                         
         self.result = ("[" + self.area + "(" + location.text +")"+" 날씨 검색 결과]\n"
@@ -117,16 +113,14 @@ class naverWeather():
                     + " \t 오후 - " + t_ary[14][:-1] + "℃ (" + t_ary[9] + ", 강수확률 : " + t_ary[8] + ")\n"
                     + "- 내일(" + t_ary[16] + ")\n"
                     + " \t 오전 - " + t_ary[26][:-1] + "℃ (" + t_ary[20] + ", 강수확률 : " + t_ary[19] + ")\n"
-                    + " \t 오후 - " + t_ary[29][:-1] + "℃ (" + t_ary[24] + ", 강수확률 : " + t_ary[23] + ")\n\n")
-
-
-
-        
-
-        
+                    + " \t 오후 - " + t_ary[29][:-1] + "℃ (" + t_ary[24] + ", 강수확률 : " + t_ary[23] + ")\n")
 
     def getWeather(self):
         if not self.result:
             # 도시명을 잘못 입력한 경우 결과가 나오지 않는다.
             return "잘못된 도시명입니다"
         return self.result
+
+    def getTemperature(self):
+        return self.graph
+            
